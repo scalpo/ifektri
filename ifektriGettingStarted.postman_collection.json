@@ -1,0 +1,41 @@
+{
+	"info": {
+		"_postman_id": "d546b472-d185-419a-96ae-8fe73a53ab1f",
+		"name": "ifektri",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "https://ifektri--{{YOURUSERNAME}}.repl.co/api/instruction",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"ifektri_createInstructionType\",\n  \"request\": {\n    \"name\": \"search for a chef\",\n    \"description\": \"searches for fukn chefs\"\n  },\n  \"callbackURL\": \"http://listener.kulipa.io/\"\n}"
+				},
+				"url": {
+					"raw": "https://ifektri--{{YOURUSERNAME}}.repl.co/api/instruction",
+					"protocol": "https",
+					"host": [
+						"ifektri--{{YOURUSERNAME}}",
+						"repl",
+						"co"
+					],
+					"path": [
+						"api",
+						"instruction"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
