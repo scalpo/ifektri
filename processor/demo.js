@@ -1,6 +1,7 @@
 
 const ifektri = require('../ifektri');
 const numverify = require('../integration/numverify');
+const mysql = require('mysql');
 
 module.exports = class demo extends ifektri.base {
   
@@ -54,8 +55,31 @@ module.exports = class demo extends ifektri.base {
 
   processInstruction(next) {
 
+
+
+
     
     //http://rest.mymobileapi.com/v1/Authentication
+
+//i-pivot-271014:us-central1:ifektri
+
+let connection = mysql.createConnection({
+  host     : '34.69.132.111',
+  user     : 'root',
+  password : 'kwagga1KWAGGA!',
+  database : 'mm'
+});
+ 
+connection.connect();
+ 
+connection.query('SELECT 1 + 1 AS solution', function (error, results, fields) {
+  if (error) 
+    console.log('err', error);
+  else
+    console.log('The solution is: ', results[0].solution);
+});
+ 
+connection.end();
 
 
     let request = this.req.body.request;

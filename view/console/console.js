@@ -17,7 +17,7 @@ function showProcessors() {
           var payload = processorInfo;
           payload.description = updatedText;
 
-          api('PUT', 'api/instructionType/' + processorInfo.name, payload, function(updateErr, data) {
+          api('PUT', 'admin/instructionType/' + processorInfo.name, payload, function(updateErr, data) {
             if (updateErr) {
               $td.html(processorInfo.description)
               return alert('Failed to update "' + (updateErr.Message || 'No processors found') + '"');
@@ -34,7 +34,7 @@ function showProcessors() {
 
       if (processorInfo && $td.children().length === 0) {
 
-        api('GET', 'api/instructionType/' + processorInfo.name, null, function(describeErr, data) {
+        api('GET', 'admin/instructionType/' + processorInfo.name, null, function(describeErr, data) {
           if (describeErr) {       
             return alert('Failed to describe processor "' + (describeErr.Message || 'Processor or source not found') + '"');
           }
@@ -56,7 +56,7 @@ function showProcessors() {
         processorInfo.enabled = (payload.enabled || 0) ? 0 : 1;
 
         //update enabled
-        api('PUT', 'api/instructionType/' + processorInfo.name, payload, function(updateErr, data) {
+        api('PUT', 'admin/instructionType/' + processorInfo.name, payload, function(updateErr, data) {
 
           if (updateErr) {
             return alert('Failed to update "' + (updateErr.Message || 'No processors found') + '"');

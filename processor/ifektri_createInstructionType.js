@@ -32,6 +32,12 @@ const getJS = (name) => {
 
   return `// processors/${name}.js
 
+
+
+////////////////////////
+// SEARCH AND REPLACE "\\n", "\n" (click the regex button) 
+////////////////////////
+
 const ifektri = require('../ifektri');
   
 module.exports = class ${name} extends ifektri.base {
@@ -126,29 +132,32 @@ module.exports = class ifektri_createInstructionType extends ifektri.base {
 
       let processorName = this.req.body.request.name;
 
-        if (insertProcessorErr || !processor) return next('Processor type already exists');
-        this.debug.processInstruction = 'ifektri_createInstructionType.processInstruction TRUE';
+      if (insertProcessorErr || !processor) return next('Processor type already exists');
+      this.debug.processInstruction = 'ifektri_createInstructionType.processInstruction TRUE';
 
-        processor.processorTemplate = {
-          js: getJS(processorName).toString()
-        };
+      //pass URL
+      //poo
 
-        if (false) {
-          //generate source
-          fs.writeFile('./processors/' + processorName + '.js', getJS(processorName).toString(), (err) => {
+      processor.processorTemplate = {
+        js: getJS(processorName).toString()
+      };
+
+      if (false) {
+        //generate source
+        fs.writeFile('./processors/' + processorName + '.js', getJS(processorName).toString(), (err) => {
+          if (err) return next(err);
+        });
+
+        //create view
+        if (!fs.existsSync('./web/' + processorName)) {
+          fs.mkdirSync('./web/' + processorName);
+          fs.writeFile('./web/' + processorName + '/index.html', getHTML(processorName).toString(), (err) => {
             if (err) return next(err);
           });
-
-          //create view
-          if (!fs.existsSync('./web/' + processorName)) {
-            fs.mkdirSync('./web/' + processorName);
-            fs.writeFile('./web/' + processorName + '/index.html', getHTML(processorName).toString(), (err) => {
-              if (err) return next(err);
-            });
-          }
         }
+      }
 
-        next(null, processor);
+      next(null, processor);
     });
   }
 }
