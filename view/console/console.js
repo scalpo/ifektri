@@ -109,7 +109,7 @@ function createProcessor() {
       callbackUrl: 'https://requestwhore--scalpo.repl.co/ifektri'
     }
 
-    api('POST', 'admin/instruction', newProcessor, function(err, processor) {
+    api('POST', 'api/instruction', newProcessor, function(err, processor) {
 
       if (err || !processor || typeof processor === 'undefined') {
         return alert('sorry that didn\'t work. in a perfect world the endpoint should have returned relevant/expected results.\n\nan error occurred "' + (err.Message || 'Processors not created') + '"');
