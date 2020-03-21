@@ -178,4 +178,12 @@ module.exports = {
       return res.status(200).json(subscriptions);
     });
   },
+  health: (req, res) => {
+    //FIX! ifektri.diagnostics(req.query, (err, subscriptions) => {
+      //f (err) return res.status(500).json({ reason: err });
+      return res.status(200).json({
+        status: "healthy"
+      });
+    //});
+  },
 }

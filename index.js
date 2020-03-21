@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const app = express();
 
 const routes = require('./routes');
@@ -9,13 +10,15 @@ const config = require('./config');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('view'));
+app.use(cors());
 
 //transactional
 app.post('/api/instruction', routes.createInstruction);
-app.get('/api/instruction/:requestId', routes.readInstruction);
+app.get('/api/instruction/:requestId', cors(), routes.readInstruction);
 app.get('/api/instruction/:requestId/item', routes.readInstructionDetail);
 
 //admin
+app.get('/admin/health', routes.health);
 app.get('/admin/instruction', routes.searchInstruction);
 app.get('/admin/instructionType', routes.searchInstructionType);
 app.get('/admin/instructionType/:type', routes.readInstructionType);
