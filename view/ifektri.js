@@ -57,8 +57,11 @@ function api(verb, path, payload, callback) {
   }*/
 
   var ajaxOptions = {
-    url: '../' + path,
+    url: path.startsWith('http') ? path : window.location.protocol + '//' + window.location.host + '/' + path,
     type: verb,
+    // xhrFields: {
+    //   withCredentials: true
+    // },
     //cache: (payload.$cache || false),
     data: payload,
     success: function (response) {

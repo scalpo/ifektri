@@ -192,9 +192,9 @@ function createRequest() {
             return;
           }
 
-          var url = 'api/instruction?debug=' + ($('#debug').prop('checked') ? '1' : '');
+          //var url = 'api/instruction?debug=' + ($('#debug').prop('checked') ? '1' : '');
 
-          api('POST', url, JSON.parse(newRequest), function(submitErr, result) {
+          api('POST', 'api/instruction?debug=' + ($('#debug').prop('checked') ? '1' : ''), JSON.parse(newRequest), function(submitErr, result) {
 
             if (!submitErr && !result) {
               return alert('sorry that didn\'t work. in a perfect world the endpoint should have returned relevant/expected results.\n\nan error occurred...');
