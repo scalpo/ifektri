@@ -10,18 +10,17 @@ const config = require('./config');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('view'));
-app.use(cors());
 
 //transactional
-app.post('/api/instruction', routes.createInstruction);
+app.post('/api/instruction', cors(), routes.createInstruction);
 app.get('/api/instruction/:requestId', cors(), routes.readInstruction);
 app.get('/api/instruction/:requestId/item', routes.readInstructionDetail);
 
 //admin
 app.get('/admin/health', routes.health);
 app.get('/admin/instruction', routes.searchInstruction);
-app.get('/admin/instructionType', routes.searchInstructionType);
-app.get('/admin/instructionType/:type', routes.readInstructionType);
+app.get('/admin/instructionType', cors(), routes.searchInstructionType);
+app.get('/admin/instructionType/:type', cors(), routes.readInstructionType);
 app.put('/admin/instructionType/:type', routes.updateInstructionType);
 app.get('/admin/subscription', routes.searchSubscription);
 

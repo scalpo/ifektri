@@ -178,6 +178,11 @@ module.exports = {
       return res.status(200).json(subscriptions);
     });
   },
+  options: (req, res) => {
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    return res.status(200);
+  },
   health: (req, res) => {
     //FIX! ifektri.diagnostics(req.query, (err, subscriptions) => {
       //f (err) return res.status(500).json({ reason: err });

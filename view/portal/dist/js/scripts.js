@@ -24,7 +24,7 @@
       console.log(b);
     });
 
-    api('GET', 'https://ifektri--ifektriifu.repl.co/admin/instructionType', {}, function(a, b) {
+    api('GET', 'https://ifektri-1--ifektriifu.repl.co/admin/instructionType', {}, function(a, b) {
       console.log(b);
     });
 
