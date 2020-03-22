@@ -33,7 +33,7 @@
     if(!$(this).data('toggle')) {
       console.log('replace content');
 
-      var $content = $('<div class="text-muted">' + new Date() + '</div>');
+      var $content = $('<div class="text-white">' + new Date() + '</div>');
 
       $('#mainContent').append($content);
     }
