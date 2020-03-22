@@ -14,11 +14,11 @@
     }
   });
 
-  // // Toggle the side navigation
-  // $('#sidebarToggle').on('click', function(e) {
-  //   e.preventDefault();
-  //   $('body').toggleClass('sb-sidenav-toggled');
-  // });
+  // Toggle the side navigation
+  $('#sidebarToggle').on('click', function(e) {
+    e.preventDefault();
+    $('body').toggleClass('sb-sidenav-toggled');
+  });
 
   api('GET', '/admin/instructionType', null, function(a, b) {
     console.log(b);
@@ -32,6 +32,10 @@
     e.preventDefault();
     if(!$(this).data('toggle')) {
       console.log('replace content');
+
+      var $content = $('<div class="text-muted">' + new Date() + '</div>');
+
+      $('#mainContent').append($content);
     }
   });
 
