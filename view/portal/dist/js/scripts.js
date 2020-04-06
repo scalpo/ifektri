@@ -38,5 +38,4 @@
       $('#mainContent').append($content);
     }
   });
-
 })(jQuery);
