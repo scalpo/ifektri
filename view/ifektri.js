@@ -1,3 +1,14 @@
+$.fn.modal = function($el) {
+  $(this)
+    .css('background-color', 'red')
+    .fadeTo(100, 0.5, function() { 
+      $(this)
+        .fadeTo(500, 0.8)
+        .css('background-color', 'white');
+    })
+    .focus();
+}
+
 $.fn.focusField = function($el) {
   $(this)
     .css('background-color', 'red')

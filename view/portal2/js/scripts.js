@@ -29,9 +29,9 @@
   //   console.log(b);
   // });
 
-  $.get('menu.js', function(menuItems) {
+  $.get('menu.json', function(menuItems) {
 
-    $.each(JSON.parse(menuItems), function(ctr, menuItem) {
+    $.each(menuItems, function(ctr, menuItem) {
 
       var $menuItem = '';
       var glyphHTML = menuItem.glyph ? '<div class="sb-nav-link-icon"><i class="' + menuItem.glyph + '"></i></div>' : '';
@@ -58,6 +58,18 @@
 
           $menuItem = $('<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapse' + id + '" aria-expanded="false" aria-controls="collapse' + id + '">' + glyphHTML + menuItem.text + '<div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div></a><div class="collapse" id="collapse' + id + '" aria-labelledby="headingOne" data-parent="#sidenavAccordion"><nav class="sb-sidenav-menu-nested nav"></nav></div></a>');
 
+          //this allows menu items of type 'list' to also load content
+          if (menuItem.content) {
+            $menuItem.on('click', function(e) {
+              e.preventDefault();
+              //if(!$(this).data('toggle')) {
+                $.get(menuItem.content, function(data) {
+                  $('#mainContent').html(data);
+                });
+              //}
+            });
+          }
+
           $.each(menuItem.items, function(c, subMenuItem) {
             var $subMenuItem = $('<a class="nav-link" href="#">' + subMenuItem.text + '</a>');
 
@@ -80,5 +92,7 @@
       $('#menu').append($menuItem);
     });
   });
+
+  
 
 })(jQuery);

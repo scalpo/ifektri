@@ -1,0 +1,53 @@
+
+<h1 class="mt-4">Requests</h1>
+
+
+
+<div class="card mb-4">
+    <div class="card-header">
+      <i class="fas fa-table mr-1"></i>Requests made to this factory
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>requestId</th>
+                        <th>requestDate</th>
+                        <th>status</th>
+                        <th>type</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBodyRequests"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+
+//get instructions
+api('GET', 'admin/instruction', {}, function(err, instructions) {
+
+  if (err || !instructions || typeof instructions === 'undefined') {
+    return alert('sorry that didn\'t work. in a perfect world the endpoint should have returned relevant/expected results.\n\nan error occurred "' + (err || 'No instructions found') + '"');
+  }
+
+  $.each(instructions, function(ctr, instruction) {
+    var $request = $('<tr><td>' + instruction.requestId + '</td><td>' + instruction.requestDate + '</td><td>' + instruction.status + '</td><td>' + instruction.type + '</td></tr>');
+
+    $request.children('td:nth-child(1)').click(function() {
+      window.open('../api/instruction/' + instruction.requestId + '/item', 'requestDetail');
+    });
+
+    $request.children('td:nth-child(3)').click(function() {
+      window.open('https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/' + instruction.status, 'httpStatusCode');
+    });
+
+    $request.children('td:nth-child(4)').click(function() {
+      window.open('../admin/instructionType/' + instruction.type, 'requestDetail');
+    });
+
+    $('#tableBodyRequests').append($request);
+  });
+});
+</script>

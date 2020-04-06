@@ -1,0 +1,43 @@
+
+<h1 class="mt-4">Tables</h1>
+<div class="card mb-4">
+    <div class="card-body">Your factory supports the following capabilities</div>
+</div>
+<div class="card mb-4">
+    <div class="card-header"><i class="fas fa-table mr-1"></i>Capabilities</div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>name</th>
+                        <th>description</th>
+                        <th>enabled</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBodyCapabilities">
+                    
+                    
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+
+//get available instruction types
+//api('GET', 'https://ifektri-1--ifektriifu.repl.co/admin/instructionType', {}, function(a, b) {
+api('GET', 'admin/instructionType', null, function(err, processors) {
+
+  if (err || !processors || typeof processors === 'undefined') {
+    return alert('sorry that didn\'t work. in a perfect world the endpoint should have returned relevant/expected results.\n\nan error occurred "' + (err || 'No processors found') + '"');
+  }
+
+  $.each(processors, function(ctr, processor) {
+    $('#tableBodyCapabilities').append($('<tr><td>' + processor.id + '</td><td>' + processor.name + '</td><td>' + processor.description + '</td><td>' + processor.enabled + '</td></tr>'));
+  });
+
+ // console.log(processors);
+});
+</script>
