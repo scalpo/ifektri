@@ -1,14 +1,9 @@
 
 const ifektri = require('../ifektri');
-const numverify = require('../integration/numverify');
-const mysql = require('mysql');
+const api = require('../helper/api');
 
 module.exports = class demo extends ifektri.base {
   
-  // authenticate(next) {
-  //   this.debug.authenticate = 'demo.authenticate TRUE';
-  //   next(null, true);
-  // }
 
   xHATEOASLink(host, ref) {
     
@@ -38,6 +33,10 @@ module.exports = class demo extends ifektri.base {
     });
   }
 
+  description() {
+    return 'Demo';
+  }
+
   validateRequest(next) {
 
     ifektri.validateSchema(this.req.body, this.describe(), (validationErr, validationResult) => {
@@ -55,45 +54,18 @@ module.exports = class demo extends ifektri.base {
 
   processInstruction(next) {
 
-
-
-
-    
-    //http://rest.mymobileapi.com/v1/Authentication
-
-//i-pivot-271014:us-central1:ifektri
-
-let connection = mysql.createConnection({
-  host     : '34.69.132.111',
-  user     : 'root',
-  password : 'kwagga1KWAGGA!',
-  database : 'mm'
-});
- 
-connection.connect();
- 
-connection.query('SELECT 1 + 1 AS solution', function (error, results, fields) {
-  if (error) 
-    console.log('err', error);
-  else
-    console.log('The solution is: ', results[0].solution);
-});
- 
-connection.end();
-
-
+    //here we search duckduckgo for ...
     let request = this.req.body.request;
+    
+    api.api('get', 'https://api.duckduckgo.com/?q=' + request.testMessage + '&format=json', null, {}, (err, result) => {
+      console.log(err, result);
+      
+      if (err) {
+        next({ message: 'FAIL' });
+      } else {
 
-    if (request.malea === 'yes') {
-      next(null, { malea: 'isQueen' });
-    }
-
-    if (request.testMessage === '200') {
-      this.debug.processInstruction = 'returning 200';
-      next(null, { testMessageReceived: '200 she said' }, 200);
-    } else {
-      this.debug.processInstruction = 'returning create';
-      next(null, { message: 'success' }, 201);
-    }
+        next(null, JSON.parse(result.RelatedTopics), 200);
+      }
+    });
   }
 }

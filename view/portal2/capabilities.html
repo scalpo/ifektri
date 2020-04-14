@@ -27,7 +27,7 @@
 <script>
 
 //get available instruction types
-//api('GET', 'https://ifektri-1--ifektriifu.repl.co/admin/instructionType', {}, function(a, b) {
+//api('GET', 'https://ifektri-1--maleakotelo1.repl.co/admin/instructionType', null, function(err, processors) {
 api('GET', 'admin/instructionType', null, function(err, processors) {
 
   if (err || !processors || typeof processors === 'undefined') {
@@ -35,7 +35,9 @@ api('GET', 'admin/instructionType', null, function(err, processors) {
   }
 
   $.each(processors, function(ctr, processor) {
-    $('#tableBodyCapabilities').append($('<tr><td>' + processor.id + '</td><td>' + processor.name + '</td><td>' + processor.description + '</td><td>' + processor.enabled + '</td></tr>'));
+    if (processor.enabled== true) {
+      $('#tableBodyCapabilities').append($('<tr><td>' + processor.id + '</td><td>' + processor.name + '</td><td>' + processor.description + '</td><td>' + processor.enabled + '</td></tr>'));
+    }
   });
 
  // console.log(processors);

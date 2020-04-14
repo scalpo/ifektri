@@ -1,6 +1,9 @@
 const request = require('request');
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('./db.sqlite3');
+
+const fs = require('fs');
+
 const dateFormat = 'dd/MM/yyyy HH:mm:ss fff';
 
 const rowIdOffSet = 99999999;
@@ -21,11 +24,35 @@ module.exports = {
 
       if (!row) {
 
-        db.run('INSERT INTO instructionType (name, description, enabled) VALUES ("ifektri_createInstructionType", "Registers a new instruction type", 1), ("demo", "Demo processor", 1), ("buyAirtime_BL", "buy airtime BLUE LABEL", 0), ("carLicenseQuote", "Quaote for vehicle license renewal", 0)');
+        db.run('INSERT INTO instructionType (name, description, enabled) VALUES ("ifektri_createInstructionType", "Registers a new instruction type", 1), ("demo", "Demo processor", 1)');
 
         return console.log('\nifektri processors registered, restart server until this message disappears :)');
       }
+
+      module.exports.addMissingInstructionTypes();
     });    
+  },
+  addMissingInstructionTypes: () => {
+    //get members from processor folder
+    fs.readdir('./processor/', (err, files) => {
+      if (err) return next(err);
+
+      files.forEach(file => {
+
+        let instructionType = file.replace('.js', '');
+
+        module.exports.getInstructionType(instructionType, (err, type) => {
+          if (!err && !type) {
+
+            let processorClass = require('./processor/' + instructionType);
+
+            if (processorClass) {
+              db.run('INSERT INTO instructionType (name, description, enabled) VALUES ("' + instructionType + '", "' + new processorClass().description() + '", 1)');
+            }
+          }
+        });
+      });
+    });   
   },
   getInstructionType: (type, next) => {
     db.get('SELECT * FROM instructionType WHERE name = ?', [type], function(err, row) {
@@ -249,27 +276,7 @@ console.log('no callback specified... NOT CALLING BACK');
     });
   },
   updateRequest: (requestId, response, status, next) => {
-
     module.exports.persistResponse(requestId, response, status, next);
-
-    // next = next || function(e, d) {};
-
-    // let data = {
-    //   $id: biject.decode(requestId) - rowIdOffSet,
-    //   $status: status,
-    //   $response: response,
-    //   $responseDate: +new Date()
-    // };
-
-    // db.run('UPDATE instruction SET status = $status, response = $response, responseDate = $responseDate WHERE name = $name WHERE id = $id', data, function(err) {
-    //   if (err) return next(err);
-
-    //   next(null, {
-    //     name: name || processor.name,
-    //     description: processor.description || undefined,
-    //     enabled: processor.enabled || 0
-    //   });
-    // });
   },
   searchRequest: (options, next) => {
 

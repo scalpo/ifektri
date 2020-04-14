@@ -13,6 +13,10 @@ module.exports = class guessMyAge extends ifektri.base {
     });
   }
 
+  description() {
+    return 'guess';
+  }
+
   authenticate(next) {
     this.debug.authenticate = 'guessMyAge.authenticate TRUE';
     next(null, true);

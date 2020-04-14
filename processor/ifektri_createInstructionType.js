@@ -27,7 +27,7 @@ const getHTML = (name) => {
 </html>`
 }
 
-const getJS = (name) => {
+const getJS = (name, description) => {
   name = name || 'instructionProcessor22';
 
   return `// processors/${name}.js
@@ -44,6 +44,9 @@ module.exports = class ${name} extends ifektri.base {
 
   describe() {
     return super.describe({
+      //ifektri capability
+      // - ${description}
+      //
       //"${name}" request schema...
       property1: {
         type: 'string',
@@ -54,6 +57,10 @@ module.exports = class ${name} extends ifektri.base {
         required: false
       } //, etc
     });
+  }
+
+  description() {
+    return '${description}';
   }
 
   authenticate(next) {
@@ -106,6 +113,10 @@ module.exports = class ifektri_createInstructionType extends ifektri.base {
     });
   }
 
+  description() {
+    return 'ifektri capability registration';
+  }
+
   authenticate(next) {
     this.debug.authenticate = 'ifektri_createInstructionType.authenticate TRUE';
     next(null, true);
@@ -131,6 +142,7 @@ module.exports = class ifektri_createInstructionType extends ifektri.base {
     db.insertProcessor(this.req.body.request, (insertProcessorErr, processor) => {
 
       let processorName = this.req.body.request.name;
+      let processorDescription = this.req.body.request.description;
 
       if (insertProcessorErr || !processor) return next('Processor type already exists');
       this.debug.processInstruction = 'ifektri_createInstructionType.processInstruction TRUE';
@@ -139,7 +151,7 @@ module.exports = class ifektri_createInstructionType extends ifektri.base {
       //poo
 
       processor.processorTemplate = {
-        js: getJS(processorName).toString()
+        js: getJS(processorName, processorDescription).toString()
       };
 
       if (false) {

@@ -27,6 +27,10 @@ module.exports = class buyAirtime_BL extends ifektri.base {
     });
   }
 
+  description() {
+    return 'Buy AIR TIME';
+  }
+
   // authenticate(next) {
   //   this.debug.authenticate = 'buyAirtime_BL.authenticate TRUE';
   //   next(null, true);

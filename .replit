@@ -1,2 +1,2 @@
 language = "nodejs"
-run = "npm install && node index.js"
+run = "npm rebuild && npm install && node index.js"

@@ -135,6 +135,10 @@ let ifektri = module.exports = {
       //return result;
     }
 
+    description(description) {
+      return description || 'ifektri capability v0.0.22';
+    }
+
     describe(innerRequest) {
 
       var schema = {
