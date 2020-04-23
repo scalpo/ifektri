@@ -24,7 +24,7 @@ module.exports = {
 
       if (!row) {
 
-        db.run('INSERT INTO instructionType (name, description, enabled) VALUES ("ifektri_createInstructionType", "Registers a new instruction type", 1), ("demo", "Demo processor", 1)');
+        db.run('INSERT INTO instructionType (name, description, enabled) VALUES ("ifektri_createInstructionType", "Registers a new capability", 1), ("demo", "Demo processor", 1)');
 
         return console.log('\nifektri processors registered, restart server until this message disappears :)');
       }

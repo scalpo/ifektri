@@ -26,20 +26,57 @@
 </div>
 <script>
 
-//get available instruction types
-//api('GET', 'https://ifektri-1--maleakotelo1.repl.co/admin/instructionType', null, function(err, processors) {
-api('GET', 'admin/instructionType', null, function(err, processors) {
+var getCapabilities = function(callback) {
+  //api('GET', 'https://ifektri-1--maleakotelo1.repl.co/admin/instructionType', null, callback
+  api('GET', 'admin/instructionType', null, callback);
+}
+
+var describeCapability = function(name, callback) {
+  api('GET', 'admin/instructionType/' + name, null, callback);
+}
+
+getCapabilities(function(err, processors) {
 
   if (err || !processors || typeof processors === 'undefined') {
     return alert('sorry that didn\'t work. in a perfect world the endpoint should have returned relevant/expected results.\n\nan error occurred "' + (err || 'No processors found') + '"');
   }
 
   $.each(processors, function(ctr, processor) {
-    if (processor.enabled== true) {
-      $('#tableBodyCapabilities').append($('<tr><td>' + processor.id + '</td><td>' + processor.name + '</td><td>' + processor.description + '</td><td>' + processor.enabled + '</td></tr>'));
+    if (processor.enabled == true) {
+
+      var $rowCapability = $('<tr><td>' + processor.id + '</td><td>' + processor.name + '&nbsp;<a href="#" data-toggle="popover" class="describeCapability" data-name="' + processor.name + '"><i class="fas fa-question"></i></a></td><td>' + processor.description + '</td><td>' + processor.enabled + '</td></tr>');
+
+      $('#tableBodyCapabilities').append($rowCapability);
     }
   });
 
- // console.log(processors);
+  //$('[data-toggle="popover"]').popover();
+
+  $('.describeCapability').click(function(e) {
+    var $this = $(this);
+    
+    e.preventDefault();
+
+    if (!$this.data('processorDescription')) {
+      $this.data('processorDescription', 'already');    //once
+
+      var processorName = $this.data('name');
+      describeCapability(processorName, function(err, processorDescription) {
+        if (err) {
+          console.log('errr', err);
+          return;
+        }
+
+        $this.popover({
+          trigger: 'auto',
+          placement: 'right',
+          title: processorDescription.name,
+          content: JSON.stringify(processorDescription.schema, null, 2)
+        });
+
+        $this.popover('show');
+      });
+    }
+  });
 });
 </script>
