@@ -191,8 +191,8 @@ module.exports = {
     let data = {
       $id: biject.decode(requestId) - rowIdOffSet,
       $date: +new Date(),
-      $response: JSON.stringify(response),
-      $status: status
+      $response: JSON.stringify(response) || '(none)',
+      $status: status || 500
     };
 
     db.run('UPDATE instruction SET response = $response, responseDate = $date, status = $status WHERE id = $id', data, function(err) {

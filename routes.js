@@ -58,18 +58,24 @@ module.exports = {
                 return requestProcessor.respond(res, 401, auhtorizationErr || 'Unauthorized');
               }
 
-              //process instruction
-              requestProcessor.processInstruction((processingErr, processResult, status) => {
+              try
+              {
+                //process instruction
+                requestProcessor.processInstruction((processingErr, processResult, status) => {
 
-                if (processingErr || !processResult) {
-                  return requestProcessor.respond(res, 500, processingErr);
-                }
+                  if (processingErr || !processResult) {
+                    return requestProcessor.respond(res, 500, processingErr);
+                  }
 
-                status = status || 200;
-                
-                return requestProcessor.respond(res, status, processResult);
-                
-              }); //requestProcessor.processInstruction()
+                  status = status || 200;
+                  
+                  return requestProcessor.respond(res, status, processResult);
+                  
+                }); //requestProcessor.processInstruction()
+              } catch (e) {
+                return requestProcessor.respond(res, 500, { processorError : 'Processor or coding error', exception: e });
+              }
+
             });   //requestProcessor.authorize()
           });     //requestProcessor.validateRequest()
         });       //requestProcessor.authenticate()

@@ -21,14 +21,6 @@
     $('body').toggleClass('sb-sidenav-toggled');
   });
 
-  // api('GET', '/admin/instructionType', null, function(a, b) {
-  //   console.log(b);
-  // });
-
-  // api('GET', 'https://ifektri-1--ifektriifu.repl.co/admin/instructionType', {}, function(a, b) {
-  //   console.log(b);
-  // });
-
   $.get('menu.json', function(menuItems) {
 
     $.each(menuItems, function(ctr, menuItem) {
@@ -92,7 +84,4 @@
       $('#menu').append($menuItem);
     });
   });
-
-  
-
 })(jQuery);

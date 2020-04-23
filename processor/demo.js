@@ -57,15 +57,15 @@ module.exports = class demo extends ifektri.base {
     //here we search duckduckgo for ...
     let request = this.req.body.request;
     
-    api.api('get', 'https://api.duckduckgo.com/?q=' + request.testMessage + '&format=json', null, {}, (err, result) => {
-      console.log(err, result);
-      
-      if (err) {
-        next({ message: 'FAIL' });
-      } else {
+    // api.api('get', 'https://api.duckduckgo.com/?q=' + request.testMessage + '&format=json', null, {}, (err, result) => {
+      //console.log(err, result);
+      //eee();
+      // if (err) {
+      //   next({ message: 'FAIL' });
+      // } else {
 
         next(null, JSON.parse(result.RelatedTopics), 200);
-      }
-    });
+      // }
+    //});
   }
 }
