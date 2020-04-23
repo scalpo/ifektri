@@ -16,10 +16,7 @@
                         <th>enabled</th>
                     </tr>
                 </thead>
-                <tbody id="tableBodyCapabilities">
-                    
-                    
-                </tbody>
+                <tbody id="tableBodyCapabilities"></tbody>
             </table>
         </div>
     </div>
@@ -42,12 +39,12 @@ getCapabilities(function(err, processors) {
   }
 
   $.each(processors, function(ctr, processor) {
-    if (processor.enabled == true) {
+    //if (processor.enabled == true) {
 
-      var $rowCapability = $('<tr><td>' + processor.id + '</td><td>' + processor.name + '&nbsp;<a href="#" data-toggle="popover" class="describeCapability" data-name="' + processor.name + '"><i class="fas fa-question"></i></a></td><td>' + processor.description + '</td><td>' + processor.enabled + '</td></tr>');
-
+      var $rowCapability = $('<tr><td>' + processor.id + '</td><td>' + processor.name + '&nbsp;<a href="#" data-toggle="popover" class="describeCapability" data-name="' + processor.name + '"><i class="fas fa-question"></i></a></td><td>' + processor.description + '</td><td>' + (processor.enabled === 1 ? '<i class="fas fa-check">' : '<i class="fas fa-times">') + '</td></tr>');
       $('#tableBodyCapabilities').append($rowCapability);
-    }
+      
+    //}
   });
 
   //$('[data-toggle="popover"]').popover();
@@ -67,11 +64,19 @@ getCapabilities(function(err, processors) {
           return;
         }
 
+
         $this.popover({
-          trigger: 'auto',
+          trigger: 'focus',
           placement: 'right',
-          title: processorDescription.name,
-          content: JSON.stringify(processorDescription.schema, null, 2)
+          html : true, 
+          content: function() {
+
+            processorDescription.schema.request
+
+
+            return $('<div><strong>' + processorDescription.name + '</strong> inputs<br/><br/><pre><code>' + JSON.stringify(processorDescription.schema.request, null, 2) + '</code></pre></div>').html();
+          },
+          title: 'usage:'
         });
 
         $this.popover('show');
