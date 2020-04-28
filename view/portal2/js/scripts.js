@@ -21,6 +21,46 @@
     $('body').toggleClass('sb-sidenav-toggled');
   });
 
+  //get queryString param by name
+  var urlParam = function(name) {
+    var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+    if (results == null) {
+      return 0;
+    }
+    return results[1] || 0;
+  }
+
+  //load content from qs  
+  var qsContent = urlParam('c') || 'none';
+
+  //loads and sets the content into main div
+  var loadContent = function(menuItem, forceLoad, onpopstate) {
+
+    //check if state set and not the same
+    var currentStateContent = window.history.state ? window.history.state.content : 'nothingSelectedYet';
+
+    if (forceLoad || currentStateContent != menuItem.content) {
+
+      //load content
+      $.get(menuItem.content, function(data) {
+
+        if (!onpopstate) {   
+          window.history.pushState(menuItem, menuItem.text, "?c=" + menuItem.content.replace('.html', ''));
+        }
+
+        $('#mainContent').html(data);
+      });
+    }
+  }
+
+  //event for state change
+  window.onpopstate = function(event) {
+    if (event && event.state) {
+      loadContent(event.state, true, true);
+    }
+  };
+
+  //load and populate menu item
   $.get('menu.json', function(menuItems) {
 
     $.each(menuItems, function(ctr, menuItem) {
@@ -29,59 +69,59 @@
       var glyphHTML = menuItem.glyph ? '<div class="sb-nav-link-icon"><i class="' + menuItem.glyph + '"></i></div>' : '';
 
       switch (menuItem.type) {
+
         case 'divider':
           $menuItem = $('<div class="sb-sidenav-menu-heading">' + menuItem.text + '</div>');
-          break;
-        case 'link':
-          $menuItem = $('<a class="nav-link" id="sidebarLinkDashboard" href="#">' + glyphHTML + menuItem.text + '</a>');
-          if (menuItem.content) {
-            $menuItem.on('click', function(e) {
-              e.preventDefault();
-              if(!$(this).data('toggle')) {
-                $.get(menuItem.content, function(data) {
-                  $('#mainContent').html(data);
-                });
-              }
-            });
-          }
           break;
         case 'list':
           var id = menuItem.text.replace(' ', '') + '_' + (new Date()).getTime();
 
           $menuItem = $('<a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapse' + id + '" aria-expanded="false" aria-controls="collapse' + id + '">' + glyphHTML + menuItem.text + '<div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div></a><div class="collapse" id="collapse' + id + '" aria-labelledby="headingOne" data-parent="#sidenavAccordion"><nav class="sb-sidenav-menu-nested nav"></nav></div></a>');
 
-          //this allows menu items of type 'list' to also load content
-          if (menuItem.content) {
-            $menuItem.on('click', function(e) {
-              e.preventDefault();
-              //if(!$(this).data('toggle')) {
-                $.get(menuItem.content, function(data) {
-                  $('#mainContent').html(data);
-                });
-              //}
-            });
-          }
-
           $.each(menuItem.items, function(c, subMenuItem) {
             var $subMenuItem = $('<a class="nav-link" href="#">' + subMenuItem.text + '</a>');
+            $subMenuItem.data('menu', subMenuItem);
+            $menuItem.children('.sb-sidenav-menu-nested').append($subMenuItem);
 
             if (subMenuItem.content) {
-              $subMenuItem.on('click', function(e) {
-                e.preventDefault();
-                if(!$(this).data('toggle')) {
-                  $.get(subMenuItem.content, function(data) {
-                    $('#mainContent').html(data);
-                  });
-                }
-              });
+              if (subMenuItem.content.replace('.html', '') === qsContent) {
+                loadContent(subMenuItem, true, true);
+              } else if (subMenuItem.default) {
+                loadContent(subMenuItem, true, false);
+              }
             }
-            
-            $menuItem.children('.sb-sidenav-menu-nested').append($subMenuItem);
           });
+
+          break;
+        case 'link':
+        default:
+          $menuItem = $('<a class="nav-link" href="#">' + glyphHTML + menuItem.text + '</a>');
           break;
       }
 
+      $menuItem.data('menu', menuItem);
       $('#menu').append($menuItem);
+
+      if (menuItem.content) {
+        if (menuItem.content.replace('.html', '') === qsContent) {
+          loadContent(menuItem, true, true);
+        } else if (menuItem.default) {
+          loadContent(menuItem, true, false);
+        }
+        
+      }
+
+    });   //foreach
+
+    $('a.nav-link').on('click', function(e) {
+      var $this = $(this);
+      var menuItem = $this.data('menu') || {};
+
+      e.preventDefault();
+      if (!$this.data('toggle') && menuItem.content) {
+        loadContent(menuItem);
+      }
     });
   });
+
 })(jQuery);

@@ -4,10 +4,10 @@
   { "text": "manage", "type": "divider" },
   { "text": "Capabilities", "type": "list", "glyph": "fas fa-columns", "items": [
     { "text": "active list", "content": "capabilities.html" },
-    { "text": "create new" }
+    { "text": "create new", "content": "s.html" }
   ]},
   { "text": "Apps", "type": "list", "glyph": "fas fa-columns", "items": [
-    { "text": "active list", "content": "capabilities.html" },
+    { "text": "active list", "content": "capabilities.html", "default": true },
     { "text": "create new" }
   ]},
   { "text": "Requests", "type": "link", "glyph": "fas fa-columns", "content": "requests.html"}
