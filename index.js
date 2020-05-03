@@ -10,6 +10,7 @@ const config = require('./config');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('view'));
+app.use(routes.identifyRequestor);
 
 //transactional
 app.post('/api/instruction', cors(), routes.createInstruction);

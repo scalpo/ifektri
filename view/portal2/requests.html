@@ -1,8 +1,6 @@
 
 <h1 class="mt-4">Requests</h1>
 
-
-
 <div class="card mb-4">
     <div class="card-header">
       <i class="fas fa-table mr-1"></i>Requests made to this factory
@@ -14,6 +12,8 @@
                     <tr>
                         <th>requestId</th>
                         <th>requestDate</th>
+                        <th>requestSize</th>
+                        <th>responseSize</th>
                         <th>status</th>
                         <th>type</th>
                     </tr>
@@ -33,17 +33,17 @@ api('GET', 'admin/instruction', {}, function(err, instructions) {
   }
 
   $.each(instructions, function(ctr, instruction) {
-    var $request = $('<tr><td>' + instruction.requestId + '</td><td>' + instruction.requestDate + '</td><td>' + instruction.status + '</td><td>' + instruction.type + '</td></tr>');
+    var $request = $('<tr><td>' + instruction.requestId + '</td><td>' + instruction.requestDate + '</td><td>' + JSON.stringify(JSON.parse(instruction.request)).length + ' bytes</td><td>' + JSON.stringify(JSON.parse(instruction.response)).length + ' bytes</td><td>' + (instruction.status || '') + '</td><td>' + instruction.type + '</td></tr>');
 
     $request.children('td:nth-child(1)').click(function() {
       window.open('../api/instruction/' + instruction.requestId + '/item', 'requestDetail');
     });
 
-    $request.children('td:nth-child(3)').click(function() {
+    $request.children('td:nth-child(5)').click(function() {
       window.open('https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/' + instruction.status, 'httpStatusCode');
     });
 
-    $request.children('td:nth-child(4)').click(function() {
+    $request.children('td:nth-child(6)').click(function() {
       window.open('../admin/instructionType/' + instruction.type, 'requestDetail');
     });
 

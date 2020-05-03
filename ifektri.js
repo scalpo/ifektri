@@ -61,13 +61,21 @@ let ifektri = module.exports = {
     next(null, schemaValidation.valid);
   },
   base: class InstructionProcessor {
-
     constructor(req, requestId) {
+      //must read https://stackoverflow.com/questions/36871299/how-to-extend-function-with-es6-classes
+      //super('...args', 'return this.__self__.__call__(...args)')
+      //var self = this.bind(this)
+      //this.__self__ = self
+      //return self
+      //implemented here https://repl.it/@arccoza/Javascript-Callable-Object-Class-Constructor
+
+      //another thorough article https://code.tutsplus.com/tutorials/inheritance-and-extending-objects-with-javascript--cms-29836
+
       this.req = req;
       this.requestId = requestId;
       this.debug = {
         date: new Date()
-      }
+      };
     }
 
     HATEOASLink(host, ref) {
@@ -93,50 +101,12 @@ let ifektri = module.exports = {
 
       //update response
       db.persistResponse(this.requestId, response, status, (err, dbResult) => {
-
-//         //process callbacks if any
-//         db.searchSubscription({ requestId: this.requestId }, (subscriptionErr, subscriptions) => {
-
-//           if (subscriptionErr || subscriptions.callbackURL) {
-// console.log('no callback specified... NOT CALLING BACK');
-//           } else {
-//             subscriptions.forEach((subscription) => {
-              
-//               console.log('calling back ====>', subscription.callbackURL, JSON.stringify(response));               
-//               //do the callback
-//               request({
-//                 uri: subscription.callbackURL,
-//                 method: 'POST',
-//                 headers: {
-//                   'x-ifektrirequest-id': this.requestId,
-//                   'x-ifektrirequest-status': 'status',
-//                   'Content-Type': 'application/json; charset="utf-8"'
-//                 },
-//                 body: JSON.stringify(result)
-//               },
-//               function (error, response, body) {
-//                 //this line needs refactoring
-//                 if (error) {
-//                   return console.error('callback failed!', error);
-//                 }
-//               });  
-//             });
-//           }
-
-//           res.status(status).json(result);
-//             return result;
-
-//   //         
-//         });
         res.status(status).json(result);
       });
-
-      //res.status(status).json(result);
-      //return result;
     }
 
     description(description) {
-      return description || 'ifektri capability v0.0.22';
+      return description + ' - v0.0.22';
     }
 
     describe(innerRequest) {

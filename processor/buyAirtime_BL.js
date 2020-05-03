@@ -28,7 +28,7 @@ module.exports = class buyAirtime_BL extends ifektri.base {
   }
 
   description() {
-    return 'Buy AIR TIME';
+    return super.description('Buy AIR TIME');
   }
 
   // authenticate(next) {

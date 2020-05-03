@@ -14,7 +14,7 @@ module.exports = class guessMyAge extends ifektri.base {
   }
 
   description() {
-    return 'guess';
+    return super.description('Guess my age');
   }
 
   authenticate(next) {
@@ -29,10 +29,6 @@ module.exports = class guessMyAge extends ifektri.base {
     });
   }
 
-  // authorize(next) {
-  //   this.debug.authorize = 'capability guessMyAge grants permission and allows this request to get through...';
-  //   next(null, true);
-  // }
 
   processInstruction(next) {
     //this is the operate block

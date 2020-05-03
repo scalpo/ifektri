@@ -4,8 +4,34 @@
 * Copyright 2013-2020 Start Bootstrap
 * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap-sb-admin/blob/master/LICENSE)
 */
+
+
+
+  
 (function($) {
   'use strict';
+
+  //loads and sets the content into main div
+  var loadContent = function(menuItem, forceLoad, onpopstate) {
+
+    //check if state set and not the same
+    var currentStateContent = window.history.state ? window.history.state.content : 'nothingSelectedYet';
+
+    var content = typeof menuItem === 'string' ? (menuItem || '') : menuItem.content;
+
+    if (forceLoad || currentStateContent != content) {
+
+      //load content
+      $.get(content, function(data) {
+
+        if (!onpopstate) {   
+          window.history.pushState(menuItem, menuItem.text, "?c=" + content.replace('.html', ''));
+        }
+
+        $('#mainContent').html(data);
+      });
+    }
+  }
 
   // Add active state to sidbar nav links
   var path = window.location.href; // because the 'href' property of the DOM element is the absolute path
@@ -31,27 +57,7 @@
   }
 
   //load content from qs  
-  var qsContent = urlParam('c') || 'none';
-
-  //loads and sets the content into main div
-  var loadContent = function(menuItem, forceLoad, onpopstate) {
-
-    //check if state set and not the same
-    var currentStateContent = window.history.state ? window.history.state.content : 'nothingSelectedYet';
-
-    if (forceLoad || currentStateContent != menuItem.content) {
-
-      //load content
-      $.get(menuItem.content, function(data) {
-
-        if (!onpopstate) {   
-          window.history.pushState(menuItem, menuItem.text, "?c=" + menuItem.content.replace('.html', ''));
-        }
-
-        $('#mainContent').html(data);
-      });
-    }
-  }
+  var qsContent = urlParam('c');
 
   //event for state change
   window.onpopstate = function(event) {
@@ -62,6 +68,8 @@
 
   //load and populate menu item
   $.get('menu.json', function(menuItems) {
+
+    var loaded = false;
 
     $.each(menuItems, function(ctr, menuItem) {
 
@@ -83,10 +91,12 @@
             $subMenuItem.data('menu', subMenuItem);
             $menuItem.children('.sb-sidenav-menu-nested').append($subMenuItem);
 
-            if (subMenuItem.content) {
+            if (subMenuItem.content && !loaded) {
               if (subMenuItem.content.replace('.html', '') === qsContent) {
+                loaded = true;
                 loadContent(subMenuItem, true, true);
-              } else if (subMenuItem.default) {
+              } else if (subMenuItem.default && !qsContent) {
+                loaded = true;
                 loadContent(subMenuItem, true, false);
               }
             }
@@ -103,17 +113,23 @@
       $('#menu').append($menuItem);
 
       if (menuItem.content) {
-        if (menuItem.content.replace('.html', '') === qsContent) {
+        if (menuItem.content.replace('.html', '') === qsContent && !loaded) {
+          loaded = true;
           loadContent(menuItem, true, true);
-        } else if (menuItem.default) {
+        } else if (menuItem.default && !loaded) {
+          loaded = true;
           loadContent(menuItem, true, false);
         }
-        
       }
 
     });   //foreach
 
+    if (!loaded) {
+      loadContent(qsContent + '.html', true, true);
+    }
+
     $('a.nav-link').on('click', function(e) {
+      
       var $this = $(this);
       var menuItem = $this.data('menu') || {};
 
@@ -125,3 +141,5 @@
   });
 
 })(jQuery);
+
+

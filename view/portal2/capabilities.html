@@ -22,65 +22,44 @@
     </div>
 </div>
 <script>
+var loadContent = function(menuItem, forceLoad, onpopstate) {
 
-var getCapabilities = function(callback) {
-  //api('GET', 'https://ifektri-1--maleakotelo1.repl.co/admin/instructionType', null, callback
-  api('GET', 'admin/instructionType', null, callback);
+  //check if state set and not the same
+  var currentStateContent = window.history.state ? window.history.state.content : 'nothingSelectedYet';
+
+  var content = typeof menuItem === 'string' ? (menuItem || '') : menuItem.content;
+
+  if (forceLoad || currentStateContent != content) {
+
+    //load content
+    $.get(content.split('?')[0], function(data) {
+
+      if (!onpopstate) {   
+        window.history.pushState(menuItem, menuItem.text, "?c=" + content.replace('.html', '').replace('?', '&'));
+      }
+
+      $('#mainContent').html(data);
+    });
+  }
 }
 
-var describeCapability = function(name, callback) {
-  api('GET', 'admin/instructionType/' + name, null, callback);
-}
-
-getCapabilities(function(err, processors) {
+api('GET', 'admin/instructionType', null, function(err, processors) {
 
   if (err || !processors || typeof processors === 'undefined') {
     return alert('sorry that didn\'t work. in a perfect world the endpoint should have returned relevant/expected results.\n\nan error occurred "' + (err || 'No processors found') + '"');
   }
 
   $.each(processors, function(ctr, processor) {
-    //if (processor.enabled == true) {
-
-      var $rowCapability = $('<tr><td>' + processor.id + '</td><td>' + processor.name + '&nbsp;<a href="#" data-toggle="popover" class="describeCapability" data-name="' + processor.name + '"><i class="fas fa-question"></i></a></td><td>' + processor.description + '</td><td>' + (processor.enabled === 1 ? '<i class="fas fa-check">' : '<i class="fas fa-times">') + '</td></tr>');
-
-      $('#tableBodyCapabilities').append($rowCapability);
-      
-    //}
-  });
-
-  //$('[data-toggle="popover"]').popover();
-
-  $('.describeCapability').click(function(e) {
-    var $this = $(this);
     
-    e.preventDefault();
+    var $rowCapability = $('<tr><td>' + processor.id + '</td><td><a href="#" class="capabilityName">' + processor.name + '</td><td>' + processor.description + '</td><td>' + (processor.enabled === 1 ? '<i class="fas fa-check">' : '<i class="fas fa-times">') + '</td></tr>');
 
-    if (!$this.data('processorDescription')) {
-      $this.data('processorDescription', 'already');    //once
+    $('#tableBodyCapabilities').append($rowCapability);
 
-      var processorName = $this.data('name');
-      describeCapability(processorName, function(err, processorDescription) {
-        if (err) {
-          console.log('errr', err);
-          return;
-        }
-
-        $this.popover({
-          trigger: 'focus',
-          placement: 'right',
-          html : true, 
-          content: function() {
-
-            //processorDescription.schema.request
-
-            return $('<div><strong>' + processorDescription.name + '</strong> inputs<br/><br/><pre><code>' + JSON.stringify(processorDescription.schema.request, null, 2) + '</code></pre></div>').html();
-          },
-          title: 'usage:'
-        });
-
-        $this.popover('show');
-      });
-    }
+    $rowCapability.click(function(e) {
+      var capabilityName = $(this).children('td:nth-child(2)').children('a').html();
+      e.preventDefault();
+      loadContent({ content: 'capability.html?name=' + capabilityName });
+    });
   });
 });
 </script>

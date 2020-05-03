@@ -3,55 +3,46 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.0/styles/default.min.css">
 
-    <title>ifektri admin</title>
+    <title>ifektri capability</title>
   </head>
   <body>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
 
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-md-6">
-          <div class="container">
-            <div id="chart" style="display: none">
-              newRequest=>start: new request|web:>javascript:clickNode('newRequest')
-              identify=>operation: identify requester:>javascript:clickNode('identify')
-              validate=>operation: validate request:>javascript:clickNode('validate')
-              isValid=>condition: is valid?|info:>javascript:clickNode('isValid')
-              badRequest=>end: response|web:>javascript:clickNode('badRequest')
-              authorize=>operation: authorize:>javascript:clickNode('authorize')
-              isAuthorized=>condition: authorized?|info:>javascript:clickNode('isAuthorized')
-              unauthorizedRequest=>end: response|web:>javascript:clickNode('unauthorizedRequest')
-              operate=>operation: operate/process:>javascript:clickNode('operate')
-              response=>end: response|web:>javascript:clickNode('response')
-
-              newRequest(right)->identify->validate->isValid
-              isValid(no)->badRequest
-              isValid(yes)->authorize->isAuthorized
-              isAuthorized(no)->unauthorizedRequest
-              isAuthorized(yes)->operate(right)->response
+    <h1 id="headingCapability" class="mt-4">Capability</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header" id="capabilitySchema"></div>
+        <div class="card-body">
+            <div class="container-fluid">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="container">
+                    <div id="chart" style="display: none"></div><br/>
+                  </div>
+                </div>
+                <!-- <div class="col-md-6">
+                  <div class="container">
+                    <div id="stepDescription">                    
+                    </div>
+                  </div>
+              </div> -->
             </div>
-              
-          </div>
         </div>
-        <div class="col-md-6">
-          <div class="container">
-            <div id="stepDescription">
-            
-            </div>
-          </div>
-      </div>
+        <!-- <div class="card-footer">
+            aaa
+        </div> -->
     </div>
-
-    <script src="https://code.jquery.com/jquery-2.2.4.js"></script>
+    <div class="card mb-4">
+        <div class="card-body" id="explainCapability"></div>
+    </div>
+    
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.13.0/flowchart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.1/highlight.min.js"></script>
-    <script src="../ifektri.js"></script>
+    <!-- <script src="../ifektri.js"></script> -->
     <script>
     //get queryString param by name
     var urlParam = function(name) {
@@ -61,8 +52,6 @@
       }
       return results[1] || 0;
     }
-
-    var instructionType = urlParam('type') || 'demo';
       
     var methods = {
       authenticate: '',
@@ -72,14 +61,12 @@
     };
 
     var describeNode = function(description) {
-
       $('#stepDescription').html('<code><pre>&nbsp;&nbsp;' + description.replace('\n', '<br />') + '</pre></code>');
-      
       hljs.highlightBlock($('#stepDescription code pre')[0]);
     }
 
-
     var clickNode = function(step) {
+      return;
       switch (step) {
         case 'newRequest':
           describeNode('A new ifektri request arrives');
@@ -115,14 +102,41 @@
     }
 
     $(document).ready(function() {
+
+      //load content from qs  
+      var capabilityName = urlParam('name');
+
+      $('#headingCapability').html('Capability : ' + capabilityName);
       
-      api('GET', 'admin/instructionType/' + instructionType, null, function(err, instructionType) {
+      api('GET', 'admin/instructionType/' + capabilityName, null, function(err, instructionType) {
+
+        $('#capabilitySchema').html('<div><h2>' + instructionType.description + '</h2><strong>' + instructionType.name + '</strong> inputs<br/><br/><pre><code>' + JSON.stringify(instructionType.schema.request, null, 2) + '</code></pre></div>');
+  
         methods.authenticate = instructionType.authenticate;
         methods.validateRequest = instructionType.validateRequest;
         methods.authorize = instructionType.authorize;
         methods.processInstruction = instructionType.processInstruction;
 
+        var code = 'newRequest=>start: new request|web:>javascript:clickNode("newRequest")\n' + 
+                'identify=>operation: identify requester:>javascript:clickNode("identify")\n' +
+                'validate=>operation: validate request:>javascript:clickNode("validate")\n' +
+                'isValid=>condition: is valid?|info:>javascript:clickNode("isValid")\n' +
+                'badRequest=>end: response|web:>javascript:clickNode("badRequest")\n' +
+                'authorize=>operation: authorize:>javascript:clickNode("authorize")\n' +
+                'isAuthorized=>condition: authorized?|info:>javascript:clickNode("isAuthorized")\n' +
+                'unauthorizedRequest=>end: response|web:>javascript:clickNode("unauthorizedRequest")\n' +
+                'operate=>operation: operate/process:>javascript:clickNode("operate")\n' +
+                'response=>end: response|web:>javascript:clickNode("response")\n' + 
+                '\n' +
+                'newRequest(right)' +
+                (instructionType.authenticateChanged ? '->identify' : '') +
+                (instructionType.validateRequestChanged ? '->validate->isValid\nisValid(no)->badRequest\nisValid(yes)' : '') +
+                (instructionType.authorizeChanged ? '->authorize->isAuthorized\nisAuthorized(no)->unauthorizedRequest\nisAuthorized(yes)' : '') +
+                (instructionType.processInstructionChanged ? '->operate(right)' : '') + 
+                '->response';
+
         $('#chart')
+          .html(code)
           .flowChart({
             'line-color': '#c0c0c0',
             'line-width': 1,
@@ -145,13 +159,12 @@
             }
         
             var $a = $(target[0].parentNode);
-console.log($a);
+
             if ($a.is('a') && !$a.data('pp')) {     //&& $a.children('text').length > 0 
 
-              
               $a.popover({
                 trigger: 'focus',
-                placement: 'right',
+                //placement: 'right',
                 html : true, 
                 container: 'body',
                 content: function() {
@@ -195,9 +208,8 @@ console.log($a);
                   var $temp = $('<code><pre>&nbsp;&nbsp;' + stepDescription.replace('\n', '<br />') + '</pre></code>');
                   hljs.highlightBlock($temp[0]);
                   return $temp.html();
-
                 },
-                title: 'FYI:'
+                title: 'your code...'
               });
 
               $a
@@ -209,47 +221,75 @@ console.log($a);
             }
           });
       });
-
-      // chart.drawSVG('canvas', {
-      //   // 'x': 30,
-      //   // 'y': 50,
-      //   'line-width': 3,
-      //   'maxWidth': 3,//ensures the flowcharts fits within a certian width
-      //   'line-length': 50,
-      //   'text-margin': 10,
-      //   'font-size': 14,
-      //   'font': 'normal',
-      //   'font-family': 'Helvetica',
-      //   'font-weight': 'normal',
-      //   'font-color': 'black',
-      //   'line-color': 'black',
-      //   'element-color': 'black',
-      //   'fill': 'white',
-      //   'yes-text': 'yes',
-      //   'no-text': 'no',
-      //   'arrow-end': 'block',
-      //   'scale': 1,
-      //   'symbols': {
-      //     'start': {
-      //       'font-color': 'red',
-      //       'element-color': 'green',
-      //       'fill': 'yellow'
-      //     },
-      //     'end':{
-      //       'class': 'end-element'
-      //     }
-      //   },
-      //   'flowstate' : {
-      //     'past' : { 'fill' : '#CCCCCC', 'font-size' : 12},
-      //     'current' : {'fill' : 'yellow', 'font-color' : 'red', 'font-weight' : 'bold'},
-      //     'future' : { 'fill' : '#FFFF99'},
-      //     'request' : { 'fill' : 'blue'},
-      //     'invalid': {'fill' : '#444444'},
-      //     'approved' : { 'fill' : '#58C4A3', 'font-size' : 12, 'yes-text' : 'APPROVED', 'no-text' : 'n/a' },
-      //     'rejected' : { 'fill' : '#C45879', 'font-size' : 12, 'yes-text' : 'n/a', 'no-text' : 'REJECTED' }
-      //   }
-      // });
     }); 
     </script>
   </body>
 </html>
+
+<!--
+
+<h1 id="headingCapability" class="mt-4">Capability</h1>
+<div class="card mb-4">
+    <div class="card-header">Usage: inputs
+      string
+      data-name
+    </div>
+    <div class="card-body">
+        sss
+    </div>
+    <div class="card-footer">
+        aaa
+    </div>
+</div>
+<div class="card mb-4">
+    <div class="card-body" id="explainCapability"></div>
+</div>
+<script>
+
+//get queryString param by name
+var urlParam = function(name) {
+  var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+  if (results == null) {
+    return 0;
+  }
+  return results[1] || 0;
+}
+
+//load content from qs  
+var capabilityName = urlParam('name');
+
+$('#headingCapability').html('Capability : ' + capabilityName);
+
+
+api('GET', 'admin/instructionType/' + capabilityName, null, function(err, capability) {
+
+  console.log(capability);
+  return ;
+
+//$('<div><strong>' + processorDescription.name + '</strong> inputs<br/><br/><pre><code>' + JSON.stringify(processorDescription.schema.request, null, 2) + '</code></pre><br/>see <a href=#" id="more">more</a></div>')
+  
+  if (err || !processors || typeof processors === 'undefined') {
+    return alert('sorry that didn\'t work. in a perfect world the endpoint should have returned relevant/expected results.\n\nan error occurred "' + (err || 'No processors found') + '"');
+  }
+
+    var $rowCapability = $('<tr><td>' + processor.id + '</td><td><a href="#" class="capabilityName">' + processor.name + '</a>&nbsp;<a href="#" data-toggle="popover" class="describeCapability" data-name="' + processor.name + '"><i class="fas fa-question"></i></a></td><td>' + processor.description + '</td><td>' + (processor.enabled === 1 ? '<i class="fas fa-check">' : '<i class="fas fa-times">') + '</td></tr>');
+
+    $('#tableBodyCapabilities').append($rowCapability);
+
+    $rowCapability.click(function(e) {
+
+      var processorName = $(this).children('td:nth-child(2)').children('a').html();
+      e.preventDefault();
+      // describeCapability(processorName, function(err, capabilityDescription) {
+      //   $('#explainCapability').replaceWith(capabilityDescription);
+      // });
+      $.get('/info/?type=' + processorName, function(explained) {
+       $('#explainCapability').replaceWith(explained);
+      });
+    });
+
+
+});
+</script>
+  
+-->

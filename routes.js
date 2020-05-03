@@ -135,6 +135,43 @@ module.exports = {
       return res.status(200).json(instruction);
     });
   },
+  identifyRequestor: (req, res, next) => {
+    /*
+    WHEN REQUESTING FROM SELF HOSTED IFEKTRI VIEW
+    headers: {
+      referer: 'https://ifektri--scalpo.repl.co/portal2/?c=capabilities',
+      'sec-fetch-dest': 'empty',
+      'sec-fetch-mode': 'cors',
+      'sec-fetch-site': 'same-origin',
+      'x-requested-with': 'XMLHttpRequest'
+    }
+
+    WHEN REQUESTING FROM EXTERNAL CLIENT/BROWSER
+    headers: {    
+      'sec-fetch-dest': 'document',
+      'sec-fetch-mode': 'navigate',
+      'sec-fetch-site': 'none',
+      'sec-fetch-user': '?1',
+      'upgrade-insecure-requests': '1',
+    }
+    */
+
+    req.ifektri = {
+      requestor: 'self'
+    };
+
+    // process.env === {
+    //   NODE_VERSION: '12.16.2',
+    //   HOSTNAME: 'ecf306a6866f',
+    //   YARN_VERSION: '1.22.4',
+    //   HOME: '/home/runner',
+    //   TERM: 'xterm-256color',
+    //   PATH: '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+    //   NODE_PATH: '/usr/local/lib/node_modules:/home/runner/node_modules',
+    //   PWD: '/home/runner/ifektri'
+    // }
+    next();
+  },
   readInstructionType: (req, res) => {
     db.getInstructionType(req.params.type, (err, instructionType) => {
       if (err) return res.status(500).json({ reason: 'Invalid or empty type encountered' });
@@ -148,7 +185,25 @@ module.exports = {
 
         if (!processorInstance) return res.status(404).json({ reason: 'Processor source missing, or compilation error.' });
 
+        instructionType.description = processorInstance.description();
+
         instructionType.schema = processorInstance.describe() || 'No schema information found';
+
+        if (req.ifektri.requestor == 'self') {
+          //https://blog.ostermiller.org/finding-comments-in-source-code-using-regular-expressions/
+
+          instructionType.authenticateChanged = processorInstance.__proto__.authenticate.toString() !== ifektri.base.prototype.authenticate.toString();
+          instructionType.authenticate = processorInstance.authenticate.toString();
+
+          instructionType.validateRequestChanged = processorInstance.__proto__.validateRequest.toString() !== ifektri.base.prototype.validateRequest.toString();
+          instructionType.validateRequest = processorInstance.validateRequest.toString();
+
+          instructionType.authorizeChanged = processorInstance.__proto__.authorize.toString() !== ifektri.base.prototype.authorize.toString();
+          instructionType.authorize = processorInstance.authorize.toString();
+
+          instructionType.processInstructionChanged = processorInstance.__proto__.processInstruction.toString() !== ifektri.base.prototype.processInstruction.toString();
+          instructionType.processInstruction = processorInstance.processInstruction.toString();
+        }
 
         return res.status(200).json(instructionType);
 

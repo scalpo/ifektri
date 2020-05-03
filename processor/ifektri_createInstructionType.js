@@ -60,7 +60,7 @@ module.exports = class ${name} extends ifektri.base {
   }
 
   description() {
-    return '${description}';
+    return super.description('${description}');
   }
 
   authenticate(next) {

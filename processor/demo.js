@@ -4,7 +4,6 @@ const api = require('../helper/api');
 
 module.exports = class demo extends ifektri.base {
   
-
   xHATEOASLink(host, ref) {
     
     let result = super.HATEOASLink(host, ref);
@@ -34,7 +33,7 @@ module.exports = class demo extends ifektri.base {
   }
 
   description() {
-    return 'Demo';
+    return super.description('Demo');
   }
 
   validateRequest(next) {
@@ -47,25 +46,23 @@ module.exports = class demo extends ifektri.base {
     });
   }
 
-  // authorize(next) {
-  //   this.debug.authorize = 'demo.authorize TRUE';
-  //   next(null, true);
-  // }
+  authorize(next) {
+    this.debug.authorize = 'demo.authorize TRUE';
+
+    let request = this.req.body.request;
+
+    if (request.passCode === 'kwagga') 
+      next(null, true);
+    else
+      next(null, false);
+  }
 
   processInstruction(next) {
 
     //here we search duckduckgo for ...
     let request = this.req.body.request;
-    
-    // api.api('get', 'https://api.duckduckgo.com/?q=' + request.testMessage + '&format=json', null, {}, (err, result) => {
-      //console.log(err, result);
-      //eee();
-      // if (err) {
-      //   next({ message: 'FAIL' });
-      // } else {
-
-        next(null, JSON.parse(result.RelatedTopics), 200);
-      // }
-    //});
+   
+    next(null, JSON.parse(result.RelatedTopics), 200);
+   
   }
 }
