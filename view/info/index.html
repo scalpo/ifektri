@@ -10,245 +10,33 @@
   </head>
   <body>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sequence-diagrams/1.0.6/sequence-diagram-min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
 
     <div class="container-fluid">
       <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-12">
           <div class="container">
-            <div id="chart" style="display: none">
-              newRequest=>start: new request|web:>javascript:clickNode('newRequest')
-              identify=>operation: identify requester:>javascript:clickNode('identify')
-              validate=>operation: validate request:>javascript:clickNode('validate')
-              isValid=>condition: is valid?|info:>javascript:clickNode('isValid')
-              badRequest=>end: response|web:>javascript:clickNode('badRequest')
-              authorize=>operation: authorize:>javascript:clickNode('authorize')
-              isAuthorized=>condition: authorized?|info:>javascript:clickNode('isAuthorized')
-              unauthorizedRequest=>end: response|web:>javascript:clickNode('unauthorizedRequest')
-              operate=>operation: operate/process:>javascript:clickNode('operate')
-              response=>end: response|web:>javascript:clickNode('response')
-
-              newRequest(right)->identify->validate->isValid
-              isValid(no)->badRequest
-              isValid(yes)->authorize->isAuthorized
-              isAuthorized(no)->unauthorizedRequest
-              isAuthorized(yes)->operate(right)->response
+            <div id="sequenceDiagram" style="display: none">
+              Title: My new app
+              app->ifektri: new user
+              ifektri-->db: create new user
+              db-->ifektri: new Id
             </div>
-              
           </div>
         </div>
-        <div class="col-md-6">
-          <div class="container">
-            <div id="stepDescription">
-            
-            </div>
-          </div>
       </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-2.2.4.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.13.0/flowchart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.1/highlight.min.js"></script>
     <script src="../ifektri.js"></script>
     <script>
-    //get queryString param by name
-    var urlParam = function(name) {
-      var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-      if (results == null) {
-        return 0;
-      }
-      return results[1] || 0;
-    }
-
-    var instructionType = urlParam('type') || 'demo';
-      
-    var methods = {
-      authenticate: '',
-      validateRequest: '',
-      authorize: '',
-      processInstruction: ''
-    };
-
-    var describeNode = function(description) {
-
-      $('#stepDescription').html('<code><pre>&nbsp;&nbsp;' + description.replace('\n', '<br />') + '</pre></code>');
-      
-      hljs.highlightBlock($('#stepDescription code pre')[0]);
-    }
-
-
-    var clickNode = function(step) {
-      switch (step) {
-        case 'newRequest':
-          describeNode('A new ifektri request arrives');
-          break;
-        case 'identify':
-          describeNode(methods.authenticate);
-          break;
-        case 'validate':
-          describeNode(methods.validateRequest);
-          break;
-        case 'isValid':
-          describeNode('if an invalid request was sent');
-          break;
-        case 'badRequest':
-          describeNode('400/404/503');
-          break;
-        case 'authorize':
-          describeNode(methods.authorize);
-          break;
-        case 'isAuthorized':
-          describeNode('if requester is allowed to call this ability');
-          break;
-        case 'unauthorizedRequest':
-          describeNode('401');
-          break;
-        case 'operate':
-          describeNode(methods.processInstruction);
-          break;
-        case 'response':
-          describeNode('200/201/500');
-          break;
-      }
-    }
-
     $(document).ready(function() {
-      
-      api('GET', 'admin/instructionType/' + instructionType, null, function(err, instructionType) {
-        methods.authenticate = instructionType.authenticate;
-        methods.validateRequest = instructionType.validateRequest;
-        methods.authorize = instructionType.authorize;
-        methods.processInstruction = instructionType.processInstruction;
-
-        $('#chart')
-          .flowChart({
-            'line-color': '#c0c0c0',
-            'line-width': 1,
-            'flowstate' : {
-              'web' : { 'fill' : '#c0c0c0', 'font-size' : 12 },
-              'info' : { 'fill' : '#f0f0f0', 'font-size' : 12 },
-              'ifektri' : {'fill' : 'yellow', 'font-color' : 'red', 'font-weight' : 'bold' },
-              'processor' : { 'fill' : '#FFFF99' }
-            }
-          })
-          .show()
-          .click(function(e) {
-
-            var target = $(event.target);
-            var targetId = target.attr('id');
-
-            if (!targetId) {
-              target = $(event.target.parentNode);
-              targetId = (target.attr('id') || 'noIdX').slice(0, -1);    //remove last "char"
-            }
-        
-            var $a = $(target[0].parentNode);
-console.log($a);
-            if ($a.is('a') && !$a.data('pp')) {     //&& $a.children('text').length > 0 
-
-              
-              $a.popover({
-                trigger: 'focus',
-                placement: 'right',
-                html : true, 
-                container: 'body',
-                content: function() {
-                  var stepDescription;
-                  switch (targetId) {
-                    case 'newRequest':
-                      stepDescription = 'A new ifektri request arrives';
-                      break;
-                    case 'identify':
-                      stepDescription = methods.authenticate;
-                      break;
-                    case 'validate':
-                      stepDescription = methods.validateRequest;
-                      break;
-                    case 'isValid':
-                      stepDescription = 'if an invalid request was sent';
-                      break;
-                    case 'badRequest':
-                      stepDescription = '400/404/503';
-                      break;
-                    case 'authorize':
-                      stepDescription = methods.authorize;
-                      break;
-                    case 'isAuthorized':
-                      stepDescription = 'if requester is allowed to call this ability';
-                      break;
-                    case 'unauthorizedRequest':
-                      stepDescription = '401';
-                      break;
-                    case 'operate':
-                      stepDescription = methods.processInstruction;
-                      break;
-                    case 'response':
-                      stepDescription = '200/201/500';
-                      break;
-                    default:
-                      stepDescription = ':(';
-                      break;
-                  }
-
-                  var $temp = $('<code><pre>&nbsp;&nbsp;' + stepDescription.replace('\n', '<br />') + '</pre></code>');
-                  hljs.highlightBlock($temp[0]);
-                  return $temp.html();
-
-                },
-                title: 'FYI:'
-              });
-
-              $a
-                .data('pp', 'pp')
-                //.on("show.bs.popover", function() {
-                //  $($(this).data("bs.popover").getTipElement()).css("max-width", "405px");
-                //})
-                $a.popover('show');
-            }
-          });
-      });
-
-      // chart.drawSVG('canvas', {
-      //   // 'x': 30,
-      //   // 'y': 50,
-      //   'line-width': 3,
-      //   'maxWidth': 3,//ensures the flowcharts fits within a certian width
-      //   'line-length': 50,
-      //   'text-margin': 10,
-      //   'font-size': 14,
-      //   'font': 'normal',
-      //   'font-family': 'Helvetica',
-      //   'font-weight': 'normal',
-      //   'font-color': 'black',
-      //   'line-color': 'black',
-      //   'element-color': 'black',
-      //   'fill': 'white',
-      //   'yes-text': 'yes',
-      //   'no-text': 'no',
-      //   'arrow-end': 'block',
-      //   'scale': 1,
-      //   'symbols': {
-      //     'start': {
-      //       'font-color': 'red',
-      //       'element-color': 'green',
-      //       'fill': 'yellow'
-      //     },
-      //     'end':{
-      //       'class': 'end-element'
-      //     }
-      //   },
-      //   'flowstate' : {
-      //     'past' : { 'fill' : '#CCCCCC', 'font-size' : 12},
-      //     'current' : {'fill' : 'yellow', 'font-color' : 'red', 'font-weight' : 'bold'},
-      //     'future' : { 'fill' : '#FFFF99'},
-      //     'request' : { 'fill' : 'blue'},
-      //     'invalid': {'fill' : '#444444'},
-      //     'approved' : { 'fill' : '#58C4A3', 'font-size' : 12, 'yes-text' : 'APPROVED', 'no-text' : 'n/a' },
-      //     'rejected' : { 'fill' : '#C45879', 'font-size' : 12, 'yes-text' : 'n/a', 'no-text' : 'REJECTED' }
-      //   }
-      // });
+      var options = {theme: 'hand'};
+      $('#sequenceDiagram')
+        .sequenceDiagram(options)
+        .show();
     }); 
     </script>
   </body>

@@ -2,7 +2,7 @@
   { "text": "my factory", "type": "divider" },
   { "text": "Dahsboard", "content": "kkkk.html", "type": "link", "glyph": "fas fa-tachometer-alt" },
   { "text": "manage", "type": "divider" },
-  { "text": "Capabilities", "type": "list", "glyph": "fas fa-columns", "items": [
+  { "text": "Abilities", "type": "list", "glyph": "fas fa-columns", "items": [
     { "text": "active list", "content": "capabilities.html" },
     { "text": "create new", "content": "s.html" }
   ]},

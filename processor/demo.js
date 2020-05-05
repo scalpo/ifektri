@@ -3,6 +3,11 @@ const ifektri = require('../ifektri');
 const api = require('../helper/api');
 
 module.exports = class demo extends ifektri.base {
+
+  // constructor() {
+  //   super();
+  //   console.log('new instance of demo woot...');
+  // }
   
   xHATEOASLink(host, ref) {
     

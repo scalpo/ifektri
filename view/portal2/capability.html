@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.0/styles/default.min.css">
 
-    <title>ifektri capability</title>
+    <title>ifektri ability</title>
   </head>
   <body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
 
-    <h1 id="headingCapability" class="mt-4">Capability</h1>
+    <h1 id="headingCapability" class="mt-4">Ability</h1>
     
     <div class="card mb-4">
         <div class="card-header" id="capabilitySchema"></div>
@@ -19,15 +19,10 @@
               <div class="row">
                 <div class="col-md-12">
                   <div class="container">
+                    <div><a id="displayMode" data-displaymode="implemented" href="#" style="display: none"><i class="fas fa-star-half-alt"></i>&nbsp;show defaults</a></div>
                     <div id="chart" style="display: none"></div><br/>
                   </div>
                 </div>
-                <!-- <div class="col-md-6">
-                  <div class="container">
-                    <div id="stepDescription">                    
-                    </div>
-                  </div>
-              </div> -->
             </div>
         </div>
         <!-- <div class="card-footer">
@@ -37,7 +32,6 @@
     <div class="card mb-4">
         <div class="card-body" id="explainCapability"></div>
     </div>
-    
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.13.0/flowchart.js"></script>
@@ -101,23 +95,39 @@
       }
     }
 
-    $(document).ready(function() {
+    function drawChart(instructionType, includeDefaultBehvaiour) {
+      if (!instructionType) {
+        console.log('Nothing to draw...');
+        return;
+      }
 
-      //load content from qs  
-      var capabilityName = urlParam('name');
-
-      $('#headingCapability').html('Capability : ' + capabilityName);
-      
-      api('GET', 'admin/instructionType/' + capabilityName, null, function(err, instructionType) {
-
-        $('#capabilitySchema').html('<div><h2>' + instructionType.description + '</h2><strong>' + instructionType.name + '</strong> inputs<br/><br/><pre><code>' + JSON.stringify(instructionType.schema.request, null, 2) + '</code></pre></div>');
+      $('#capabilitySchema').html('<div><h2>' + instructionType.description + '</h2><strong>' + instructionType.name + '</strong> inputs<br/><br/><pre><code>' + JSON.stringify(instructionType.schema.request, null, 2) + '</code></pre></div>');
   
         methods.authenticate = instructionType.authenticate;
         methods.validateRequest = instructionType.validateRequest;
         methods.authorize = instructionType.authorize;
         methods.processInstruction = instructionType.processInstruction;
 
-        var code = 'newRequest=>start: new request|web:>javascript:clickNode("newRequest")\n' + 
+        var code;
+        if (includeDefaultBehvaiour) {
+          code = 'newRequest=>start: new request|web:>javascript:clickNode("newRequest")\n' + 
+                'identify=>operation: identify requester' + (!instructionType.authenticateChanged ? '|default' : '') + ':>javascript:clickNode("identify")\n' +
+                'validate=>operation: validate request' + (!instructionType.validateRequestChanged ? '|default' : '') + ':>javascript:clickNode("validate")\n' +
+                'isValid=>condition: is valid?' + (!instructionType.validateRequestChanged ? '|default' : '|info') + ':>javascript:clickNode("isValid")\n' +
+                'badRequest=>end: response' + (!instructionType.validateRequestChanged ? '|default' : '|web') + ':>javascript:clickNode("badRequest")\n' +
+                'authorize=>operation: authorize' + (!instructionType.authorizeChanged ? '|default' : '') + ':>javascript:clickNode("authorize")\n' +
+                'isAuthorized=>condition: authorized?' + (!instructionType.authorizeChanged ? '|default' : '|info') + ':>javascript:clickNode("isAuthorized")\n' +
+                'unauthorizedRequest=>end: response' + (!instructionType.authorizeChanged ? '|default' : '|web') + ':>javascript:clickNode("unauthorizedRequest")\n' +
+                'operate=>operation: operate/process' + (!instructionType.processInstructionChanged ? '|default' : '') + ':>javascript:clickNode("operate")\n' +
+                'response=>end: response|web:>javascript:clickNode("response")\n' + 
+                '\n' +
+                'newRequest(right)->identify->validate->isValid\n' +
+                'isValid(no)->badRequest\n' +
+                'isValid(yes)->authorize->isAuthorized\n' +
+                'isAuthorized(no)->unauthorizedRequest\n' +
+                'isAuthorized(yes)->operate(right)->response';
+        } else {
+          code = 'newRequest=>start: new request|web:>javascript:clickNode("newRequest")\n' + 
                 'identify=>operation: identify requester:>javascript:clickNode("identify")\n' +
                 'validate=>operation: validate request:>javascript:clickNode("validate")\n' +
                 'isValid=>condition: is valid?|info:>javascript:clickNode("isValid")\n' +
@@ -134,7 +144,8 @@
                 (instructionType.authorizeChanged ? '->authorize->isAuthorized\nisAuthorized(no)->unauthorizedRequest\nisAuthorized(yes)' : '') +
                 (instructionType.processInstructionChanged ? '->operate(right)' : '') + 
                 '->response';
-
+        }
+        
         $('#chart')
           .html(code)
           .flowChart({
@@ -143,7 +154,7 @@
             'flowstate' : {
               'web' : { 'fill' : '#c0c0c0', 'font-size' : 12 },
               'info' : { 'fill' : '#f0f0f0', 'font-size' : 12 },
-              'ifektri' : {'fill' : 'yellow', 'font-color' : 'red', 'font-weight' : 'bold' },
+              'default' : {'fill' : '#f0f0f0', 'font-size' : 12, 'element-color': '#D3D3D3', 'font-color': '#D3D3D3', 'font-weight' : 'bold' },
               'processor' : { 'fill' : '#FFFF99' }
             }
           })
@@ -209,87 +220,56 @@
                   hljs.highlightBlock($temp[0]);
                   return $temp.html();
                 },
-                title: 'your code...'
+                title: 'FYI'
               });
 
               $a
                 .data('pp', 'pp')
-                //.on("show.bs.popover", function() {
-                //  $($(this).data("bs.popover").getTipElement()).css("max-width", "405px");
-                //})
                 $a.popover('show');
             }
           });
+    }
+
+    $(document).ready(function() {
+
+      //load content from qs  
+      var capabilityName = urlParam('name');
+      var capability;
+
+      $('#headingCapability').html('Ability : ' + capabilityName);
+      
+      api('GET', 'admin/instructionType/' + capabilityName, null, function(err, instructionType) {
+        capability = instructionType;
+        
+        drawChart(capability);
+      
+        //!(x && y && z) && (x || y || z);
+        if (!(capability.authenticateChanged && capability.validateRequestChanged && capability.authorizeChanged && capability.processInstructionChanged) && (capability.authenticateChanged || capability.validateRequestChanged || capability.authorizeChanged || capability.processInstructionChanged)) {
+          
+          $('#displayMode')
+            .show()
+            .click(function(e) {
+              e.preventDefault();
+              var $this = $(this);
+
+              if ($this.data('displaymode') === 'implemented') {
+                $this
+                  .data('displaymode', 'defaults')
+                  .html('<i class="fas fa-star-half"></i>&nbsp;hide defaults');
+
+                drawChart(capability, true);
+
+              } else {
+                $this
+                  .data('displaymode', 'implemented')
+                  .html('<i class="fas fa-star-half-alt"></i>&nbsp;show defaults');      
+
+                drawChart(capability);
+              }
+            });
+        }
       });
     }); 
     </script>
   </body>
 </html>
-
-<!--
-
-<h1 id="headingCapability" class="mt-4">Capability</h1>
-<div class="card mb-4">
-    <div class="card-header">Usage: inputs
-      string
-      data-name
-    </div>
-    <div class="card-body">
-        sss
-    </div>
-    <div class="card-footer">
-        aaa
-    </div>
-</div>
-<div class="card mb-4">
-    <div class="card-body" id="explainCapability"></div>
-</div>
-<script>
-
-//get queryString param by name
-var urlParam = function(name) {
-  var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-  if (results == null) {
-    return 0;
-  }
-  return results[1] || 0;
-}
-
-//load content from qs  
-var capabilityName = urlParam('name');
-
-$('#headingCapability').html('Capability : ' + capabilityName);
-
-
-api('GET', 'admin/instructionType/' + capabilityName, null, function(err, capability) {
-
-  console.log(capability);
-  return ;
-
-//$('<div><strong>' + processorDescription.name + '</strong> inputs<br/><br/><pre><code>' + JSON.stringify(processorDescription.schema.request, null, 2) + '</code></pre><br/>see <a href=#" id="more">more</a></div>')
-  
-  if (err || !processors || typeof processors === 'undefined') {
-    return alert('sorry that didn\'t work. in a perfect world the endpoint should have returned relevant/expected results.\n\nan error occurred "' + (err || 'No processors found') + '"');
-  }
-
-    var $rowCapability = $('<tr><td>' + processor.id + '</td><td><a href="#" class="capabilityName">' + processor.name + '</a>&nbsp;<a href="#" data-toggle="popover" class="describeCapability" data-name="' + processor.name + '"><i class="fas fa-question"></i></a></td><td>' + processor.description + '</td><td>' + (processor.enabled === 1 ? '<i class="fas fa-check">' : '<i class="fas fa-times">') + '</td></tr>');
-
-    $('#tableBodyCapabilities').append($rowCapability);
-
-    $rowCapability.click(function(e) {
-
-      var processorName = $(this).children('td:nth-child(2)').children('a').html();
-      e.preventDefault();
-      // describeCapability(processorName, function(err, capabilityDescription) {
-      //   $('#explainCapability').replaceWith(capabilityDescription);
-      // });
-      $.get('/info/?type=' + processorName, function(explained) {
-       $('#explainCapability').replaceWith(explained);
-      });
-    });
-
-
-});
-</script>
-  
--->
