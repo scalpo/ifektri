@@ -54,7 +54,7 @@ let ifektri = module.exports = {
   },
   validateSchema: (data, schema, next) => {
 
-    let schemaValidation = mschema.validate(data, schema, { strict: true });
+    let schemaValidation = mschema.validate(data, schema, { strict: false });
 
     if (schemaValidation && schemaValidation.errors && schemaValidation.errors.length > 0) return next(schemaValidation.errors);
 

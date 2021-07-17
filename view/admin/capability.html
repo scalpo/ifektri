@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.0/styles/default.min.css">
+
+    <title>ifektri ability</title>
+  </head>
+  <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+
+    <h1 id="headingCapability" class="mt-4">Ability</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header" id="capabilitySchema"></div>
+        <div class="card-body">
+            <div class="container-fluid">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="container">
+                    <div><a id="displayMode" data-displaymode="implemented" href="#" style="display: none"><i class="fas fa-star-half-alt"></i>&nbsp;show defaults</a></div>
+                    <div id="chart" style="display: none"></div><br/>
+                  </div>
+                </div>
+            </div>
+        </div>
+        <!-- <div class="card-footer">
+            aaa
+        </div> -->
+    </div>
+    <div class="card mb-4">
+        <div class="card-body" id="explainCapability"></div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.13.0/flowchart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.1/highlight.min.js"></script>
+    <!-- <script src="../ifektri.js"></script> -->
+    <script>
+    //get queryString param by name
+    var urlParam = function(name) {
+      var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+      if (results == null) {
+        return 0;
+      }
+      return results[1] || 0;
+    }
+      
+    var methods = {
+      authenticate: '',
+      validateRequest: '',
+      authorize: '',
+      processInstruction: ''
+    };
+
+    var describeNode = function(description) {
+      $('#stepDescription').html('<code><pre>&nbsp;&nbsp;' + description.replace('\n', '<br />') + '</pre></code>');
+      hljs.highlightBlock($('#stepDescription code pre')[0]);
+    }
+
+    var clickNode = function(step) {
+      return;
+      switch (step) {
+        case 'newRequest':
+          describeNode('A new ifektri request arrives');
+          break;
+        case 'identify':
+          describeNode(methods.authenticate);
+          break;
+        case 'validate':
+          describeNode(methods.validateRequest);
+          break;
+        case 'isValid':
+          describeNode('if an invalid request was sent');
+          break;
+        case 'badRequest':
+          describeNode('400/404/503');
+          break;
+        case 'authorize':
+          describeNode(methods.authorize);
+          break;
+        case 'isAuthorized':
+          describeNode('if requester is allowed to call this ability');
+          break;
+        case 'unauthorizedRequest':
+          describeNode('401');
+          break;
+        case 'operate':
+          describeNode(methods.processInstruction);
+          break;
+        case 'response':
+          describeNode('200/201/500');
+          break;
+      }
+    }
+
+    function drawChart(instructionType, includeDefaultBehvaiour) {
+      if (!instructionType) {
+        console.log('Nothing to draw...');
+        return;
+      }
+
+      $('#capabilitySchema').html('<div><h2>' + instructionType.description + '</h2><strong>' + instructionType.name + '</strong> inputs<br/><br/><pre><code>' + JSON.stringify(instructionType.schema.request, null, 2) + '</code></pre></div>');
+  
+        methods.authenticate = instructionType.authenticate;
+        methods.validateRequest = instructionType.validateRequest;
+        methods.authorize = instructionType.authorize;
+        methods.processInstruction = instructionType.processInstruction;
+
+        var code;
+        if (includeDefaultBehvaiour) {
+          code = 'newRequest=>start: new request|web:>javascript:clickNode("newRequest")\n' + 
+                'identify=>operation: identify requester' + (!instructionType.authenticateChanged ? '|default' : '') + ':>javascript:clickNode("identify")\n' +
+                'validate=>operation: validate request' + (!instructionType.validateRequestChanged ? '|default' : '') + ':>javascript:clickNode("validate")\n' +
+                'isValid=>condition: is valid?' + (!instructionType.validateRequestChanged ? '|default' : '|info') + ':>javascript:clickNode("isValid")\n' +
+                'badRequest=>end: response' + (!instructionType.validateRequestChanged ? '|default' : '|web') + ':>javascript:clickNode("badRequest")\n' +
+                'authorize=>operation: authorize' + (!instructionType.authorizeChanged ? '|default' : '') + ':>javascript:clickNode("authorize")\n' +
+                'isAuthorized=>condition: authorized?' + (!instructionType.authorizeChanged ? '|default' : '|info') + ':>javascript:clickNode("isAuthorized")\n' +
+                'unauthorizedRequest=>end: response' + (!instructionType.authorizeChanged ? '|default' : '|web') + ':>javascript:clickNode("unauthorizedRequest")\n' +
+                'operate=>operation: operate/process' + (!instructionType.processInstructionChanged ? '|default' : '') + ':>javascript:clickNode("operate")\n' +
+                'response=>end: response|web:>javascript:clickNode("response")\n' + 
+                '\n' +
+                'newRequest(right)->identify->validate->isValid\n' +
+                'isValid(no)->badRequest\n' +
+                'isValid(yes)->authorize->isAuthorized\n' +
+                'isAuthorized(no)->unauthorizedRequest\n' +
+                'isAuthorized(yes)->operate(right)->response';
+        } else {
+          code = 'newRequest=>start: new request|web:>javascript:clickNode("newRequest")\n' + 
+                'identify=>operation: identify requester:>javascript:clickNode("identify")\n' +
+                'validate=>operation: validate request:>javascript:clickNode("validate")\n' +
+                'isValid=>condition: is valid?|info:>javascript:clickNode("isValid")\n' +
+                'badRequest=>end: response|web:>javascript:clickNode("badRequest")\n' +
+                'authorize=>operation: authorize:>javascript:clickNode("authorize")\n' +
+                'isAuthorized=>condition: authorized?|info:>javascript:clickNode("isAuthorized")\n' +
+                'unauthorizedRequest=>end: response|web:>javascript:clickNode("unauthorizedRequest")\n' +
+                'operate=>operation: operate/process:>javascript:clickNode("operate")\n' +
+                'response=>end: response|web:>javascript:clickNode("response")\n' + 
+                '\n' +
+                'newRequest(right)' +
+                (instructionType.authenticateChanged ? '->identify' : '') +
+                (instructionType.validateRequestChanged ? '->validate->isValid\nisValid(no)->badRequest\nisValid(yes)' : '') +
+                (instructionType.authorizeChanged ? '->authorize->isAuthorized\nisAuthorized(no)->unauthorizedRequest\nisAuthorized(yes)' : '') +
+                (instructionType.processInstructionChanged ? '->operate(right)' : '') + 
+                '->response';
+        }
+        
+        $('#chart')
+          .html(code)
+          .flowChart({
+            'line-color': '#c0c0c0',
+            'line-width': 1,
+            'flowstate' : {
+              'web' : { 'fill' : '#c0c0c0', 'font-size' : 12 },
+              'info' : { 'fill' : '#f0f0f0', 'font-size' : 12 },
+              'default' : {'fill' : '#f0f0f0', 'font-size' : 12, 'element-color': '#D3D3D3', 'font-color': '#D3D3D3', 'font-weight' : 'bold' },
+              'processor' : { 'fill' : '#FFFF99' }
+            }
+          })
+          .show()
+          .click(function(e) {
+
+            var target = $(event.target);
+            var targetId = target.attr('id');
+
+            if (!targetId) {
+              target = $(event.target.parentNode);
+              targetId = (target.attr('id') || 'noIdX').slice(0, -1);    //remove last "char"
+            }
+        
+            var $a = $(target[0].parentNode);
+
+            if ($a.is('a') && !$a.data('pp')) {     //&& $a.children('text').length > 0 
+
+              $a.popover({
+                trigger: 'focus',
+                //placement: 'right',
+                html : true, 
+                container: 'body',
+                content: function() {
+                  var stepDescription;
+                  switch (targetId) {
+                    case 'newRequest':
+                      stepDescription = 'A new ifektri request arrives';
+                      break;
+                    case 'identify':
+                      stepDescription = methods.authenticate;
+                      break;
+                    case 'validate':
+                      stepDescription = methods.validateRequest;
+                      break;
+                    case 'isValid':
+                      stepDescription = 'if an invalid request was sent';
+                      break;
+                    case 'badRequest':
+                      stepDescription = '400/404/503';
+                      break;
+                    case 'authorize':
+                      stepDescription = methods.authorize;
+                      break;
+                    case 'isAuthorized':
+                      stepDescription = 'if requester is allowed to call this ability';
+                      break;
+                    case 'unauthorizedRequest':
+                      stepDescription = '401';
+                      break;
+                    case 'operate':
+                      stepDescription = methods.processInstruction;
+                      break;
+                    case 'response':
+                      stepDescription = '200/201/500';
+                      break;
+                    default:
+                      stepDescription = ':(';
+                      break;
+                  }
+
+                  var $temp = $('<code><pre>&nbsp;&nbsp;' + stepDescription.replace('\n', '<br />') + '</pre></code>');
+                  hljs.highlightBlock($temp[0]);
+                  return $temp.html();
+                },
+                title: 'FYI'
+              });
+
+              $a
+                .data('pp', 'pp')
+                $a.popover('show');
+            }
+          });
+    }
+
+    $(document).ready(function() {
+
+      //load content from qs  
+      var capabilityName = urlParam('name');
+      var capability;
+
+      $('#headingCapability').html('Ability : ' + capabilityName);
+      
+      api('GET', 'admin/instructionType/' + capabilityName, null, function(err, instructionType) {
+        capability = instructionType;
+        
+        drawChart(capability);
+      
+        //!(x && y && z) && (x || y || z);
+        if (!(capability.authenticateChanged && capability.validateRequestChanged && capability.authorizeChanged && capability.processInstructionChanged) && (capability.authenticateChanged || capability.validateRequestChanged || capability.authorizeChanged || capability.processInstructionChanged)) {
+          
+          $('#displayMode')
+            .show()
+            .click(function(e) {
+              e.preventDefault();
+              var $this = $(this);
+
+              if ($this.data('displaymode') === 'implemented') {
+                $this
+                  .data('displaymode', 'defaults')
+                  .html('<i class="fas fa-star-half"></i>&nbsp;hide defaults');
+
+                drawChart(capability, true);
+
+              } else {
+                $this
+                  .data('displaymode', 'implemented')
+                  .html('<i class="fas fa-star-half-alt"></i>&nbsp;show defaults');      
+
+                drawChart(capability);
+              }
+            });
+        }
+      });
+    }); 
+    </script>
+  </body>
+</html>
